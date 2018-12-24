@@ -1,2 +1,2 @@
 # BlockChain
-BlockChain Final Project
+BlockChain Project
