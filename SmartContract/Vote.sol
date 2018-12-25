@@ -21,6 +21,12 @@ contract Ballot {
     // 定义投票发起人
     address private chairperson;
 
+    // 投票项目名称
+    bytes32 private VoteName;
+
+    // 投票项目描述
+    bytes32 private VoteDescription;
+
     //投票是否终止
     bool private wetherStopped = false;
 
@@ -31,7 +37,7 @@ contract Ballot {
     Proposal[] private proposals;
 
     // 传入提议名称来定义一个投票对象
-    constructor(bytes32[] memory proposalNames,bytes32[] memory proposalContents) public
+    constructor(bytes32 voteName,bytes32 voteDescription,bytes32[] memory proposalNames,bytes32[] memory proposalContents) public
     {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
@@ -45,6 +51,8 @@ contract Ballot {
                 voteCount: 0
             }));
         }
+        VoteName = voteName;
+        VoteDescription = voteDescription;
     }
 
     //转交管理权
@@ -71,6 +79,25 @@ contract Ballot {
         }));
     }
 
+    //查看项目名称
+    function showName() public view returns (bytes32)
+    {
+        return VoteName;    
+    }
+
+    //查看项目描述
+    function showDescription() public view returns (bytes32)
+    {
+        return VoteDescription;    
+    }
+
+    //查看特定的提议
+    function showProposal(uint num) public view returns (bytes32 )
+    {
+        bytes32 proposalName_ = proposals[num].name;
+        return proposalName_;
+    }
+
     //查看所有的提议
     function showAllProposals() public view returns (bytes32[] memory )
     {
@@ -79,6 +106,13 @@ contract Ballot {
             proposalName_[i] = proposals[i].name;
         }
         return proposalName_;
+    }
+
+    //查看特定提议的票数
+    function getTicket(uint num) public view returns (uint )
+    {
+        uint tickets = proposals[num].voteCount;
+        return tickets;
     }
 
     //查看每个提议的票数
