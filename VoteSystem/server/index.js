@@ -37,6 +37,7 @@ async function start() {
       || req.path === '/api/user/registe'
       || req.path === '/favicon.ico'
       || req.path === '/logo.png'
+      || req.path === '/__webpack_hmr/client'
       || req.path.substring(0,14) === '/__webpack_hmr'
       || req.path.substring(0,6) === '/_nuxt' ){
       return true

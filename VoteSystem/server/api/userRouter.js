@@ -3,6 +3,8 @@ const express = require('express')
 //定义路由级中间件
 userRouter = express.Router()
 const validator = require('../Judge/validator')
+const jwt = require('jsonwebtoken')
+const myJwt = require('../JWT/jwt')
 const contractOP = require('../contractOP/contractOP')
 const db = require('../DB/db')
 //登陆状态
@@ -37,7 +39,30 @@ userRouter.post('/login', (req, res) => {
       message: message
     });
   } else {
-    db.searchUser(res,userName,userPassword)
+    db.findUser(userName,userPassword,async function (err, result) {
+      if (err || result.length === 0) {
+        console.log("[LoginERROR]",err)
+        res.json({
+          state: false,
+          message: '账号或密码错误'
+        });
+      } else{
+        console.log("[Login]",userName)
+        let token = jwt.sign({
+          userName,
+          userPassword
+        },myJwt.secretOrPrivateKey,{
+          expiresIn : 60*60*2// 授权时效2小时
+        })
+        res.cookie("token","Bearer "+token,{ maxAge: 1000*60*60*2}) //cookie有效期为2小时
+        res.json({
+          state: 200,
+          result: 'ok',
+          token: token,
+          message: '登陆成功'
+        })
+      }
+    })
   }
 })
 //退出
@@ -66,7 +91,7 @@ userRouter.post('/logout',(req,res)=>{
   }
 })
 //注册
-userRouter.post('/registe', (req, res) => {
+userRouter.post('/registe',async (req, res) => {
   let userName = req.body.name
   let userPassword = req.body.password
   let msg = ''
@@ -84,7 +109,22 @@ userRouter.post('/registe', (req, res) => {
       message: msg
     });
   } else {
-    contractOP.newAccount(userName,userPassword,res)
+    contractOP.newAccount(userName,userPassword,function (err, result) {
+      if (err || result.length === 0) {
+        console.log("[REGISTERROR]: ",err)
+        res.json({
+          state: false,
+          message: '用户名已存在'
+        })
+      } else {
+        console.log("[REGIST]",userName)
+        res.json({
+          state: 200,
+          result: 'ok',
+          message: '注册成功'
+        })
+      }
+    })
   }
 })
 
