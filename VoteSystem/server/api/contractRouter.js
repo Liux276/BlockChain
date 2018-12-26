@@ -22,11 +22,13 @@ contractRouter.post('/newContract',(req,res)=>{
 			})
 		} else if(req.body.proposalNames.length !== req.body.proposalContents.length 
 			|| typeof req.body.voteName !== 'string'
-			|| typeof req.body.voteDescription !== 'string'){
-				console.log(typeof req.body.proposalContents)
+			|| typeof req.body.voteDescription !== 'string'
+			|| req.body.voteName.length === 0
+			|| req.body.voteDescription.length === 0
+			|| req.body.proposalNames.length === 0){
 			res.json({
 				state: false,
-				message: '提议名称和内容必须一一对应,且按照格式填写'
+				message: '投票信息和提议必须一一对应,且按照格式填写'
 			})
 		} else {
 			let CInfo = {
@@ -35,6 +37,7 @@ contractRouter.post('/newContract',(req,res)=>{
 				proposalNames: req.body.proposalNames,
 				proposalContents: req.body.proposalContents,
 			}
+			console.log('[CINFO]',CInfo)
 			db.findUser(userName,userPassword,async function(err,result){
         if(err || result.length === 0){
 					console.log('[NewContractError]',err)
@@ -49,7 +52,7 @@ contractRouter.post('/newContract',(req,res)=>{
 						if(err || result.length === 0){
 							res.json({
 								state: false,
-								message: '合约部署失败'
+								message: result.length === 0 ? '合约保存失败' : result
 							})
 						} else {
 							res.json({
@@ -61,6 +64,10 @@ contractRouter.post('/newContract',(req,res)=>{
         }
     	})
 		}
+})
+
+contractRouter.post('/accountInfo',(req,res)=>{
+	
 })
 
 module.exports = contractRouter

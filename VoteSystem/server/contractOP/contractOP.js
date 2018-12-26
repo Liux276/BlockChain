@@ -30,8 +30,8 @@ var contractOP = {
 	//转账
 	showMeTheMoney : async function(userAddress,ethNum){
 		//测试账户
-		let userAdmin = '0x1486e930b2d1b606c33619aa8b3ac5e39cdbaa40'
-		let adminPassword = '0xda36b2a1d094cf82bb3b4cec841d6826fff61d6f3d14bc39020ed9bc3c045f5a'
+		let userAdmin = '0x0d7cb9f9c01410879294e16a3285d6e8762f60ee'
+		let adminPassword = '0x16a9823534fa6c605ef2981f88583fe2db46a8fa88e3461268975dc9b2c51d2b'
 		web3.eth.personal.unlockAccount(userAdmin,adminPassword,1000)
 		.then(
 			transaction = {
@@ -54,6 +54,10 @@ var contractOP = {
 		})
 		let ballotContract = new web3.eth.Contract(compiledContract.abi)
 		web3.eth.personal.unlockAccount(userAddress,userPassword,1000)
+		.catch((err)=>{
+			console.log('[账户解锁失败]',err)
+			callback(err,'账户解锁失败')
+		})
 		.then(
 			info = {
 				voteName: web3.utils.toHex(CInfo.voteName),
@@ -68,7 +72,7 @@ var contractOP = {
 				proposalContents: ()=>{
 					let proposalCs = new Array()
 					for(let i = 0;i<CInfo.proposalContents;i++){
-						proposalCs[i] = web3.utils.toHex(CInfo.proposalContent[i])
+						proposalCs[i] = web3.utils.toHex(CInfo.proposalContents[i])
 					}
 					return proposalCs
 				}
@@ -79,28 +83,20 @@ var contractOP = {
 			})
 			.send({
 				from: userAddress, 
-				gas: compiledContract.gas,
-				//gasPrice: '30000000000000'
+				gas: compiledContract.gas
 			},function(err, transactionHash){
-				if(err){
-					console.log('[ContractTransactionHash]',err)
-					callback(err,'合约部署失败')
-				}
 				if (typeof transactionHash !== 'undefined') {
 					console.log('[ContractTransactionHash]: ',transactionHash)
 				}
 			})
 			.then(function(newContract){
+				console.log('[NewContract]: ',newContract.options.address)
 				db.creatContract(UName,newContract.options.address,CInfo.voteName,CInfo.voteDescription,callback)
 			})
 			.catch((err)=>{
-				console.log('合约部署失败',err)
+				console.log('[合约部署失败]',err)
 			})
-		).catch((err)=>{
-			//console.log(err)
-			callback(err,'合约部署失败')
-		})
-		
+		)
 	}
 }
 

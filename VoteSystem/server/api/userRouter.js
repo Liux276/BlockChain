@@ -102,8 +102,8 @@ userRouter.post('/registe',async (req, res) => {
   } else {
     msg = '需要填写用户名和密码'
   }
-  console.log('[REGISTEERROR]',msg)
   if (msg !== '') {
+    console.log('[REGISTEERROR]',msg)
     res.json({
       state: false,
       message: msg
@@ -111,7 +111,7 @@ userRouter.post('/registe',async (req, res) => {
   } else {
     contractOP.newAccount(userName,userPassword,function (err, result) {
       if (err || result.length === 0) {
-        console.log("[REGISTERROR]: ",err)
+        console.log("[REGISTERROR]",err)
         res.json({
           state: false,
           message: '用户名已存在'

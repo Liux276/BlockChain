@@ -20,7 +20,7 @@
         </el-main>
         <el-aside width="150px">
           <el-menu
-          router>
+            router>
             <el-menu-item index="1">
               <i class="el-icon-star-on"/>
               参与的投票
@@ -29,7 +29,7 @@
               <i class="el-icon-warning"/>
               管理投票请求
             </el-menu-item>
-            <el-menu-item index="3">
+            <el-menu-item index="/contractManage/contractManage">
               <i class="el-icon-circle-check"/>
               创建的投票
             </el-menu-item>
@@ -63,7 +63,6 @@ export default {
           if (res.status === 200 && res.data.state) {
             context.$router.replace('/Login')
             context.getUserName()
-            context.$router.
             context.$notify({
               type: 'success',
               message: res.data.message,

@@ -34,4 +34,8 @@ db.creatContract = async function(userName,CAddress,CName,CDescribe,callback){
 	conn.query(sqlMap.contractOP.creatContract,[CAddress,CName,CDescribe,userName],callback)
 }
 
+//查询合约信息
+db.queryAllContract = async function(userName,callback){
+	
+}
 module.exports = db
