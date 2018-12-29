@@ -11,20 +11,21 @@ var sqlMap = {
     queryAllContractNotRequested:
       'select * ' +
       'from contract ' +
-      'where contract.UName != ? and contract.CAddress not in ( ' +
+      'where contract.UName != ? and contract.isEnd = "投票中" and contract.CAddress not in ( ' +
       'select requesttable.CAddress ' +
       'from requesttable ' +
-      'where requesttable.requestUName=? ) ',
+      'where requesttable.requestUName=? and requesttable.isPermit = "是" ) ',
     queryUserContract: 'select * from contract where UName=?',
     queryContract: 'select * from contract where CAddress=? and UName = ?',
     queryContractAndUAddress:
-      'select userinfo.UAddress,userinfo.UPassword ' +
+      'select userinfo.UAddress,userinfo.UPassword,contract.isEnd ' +
       'from contract,userinfo ' +
       'where contract.CAddress=? and contract.UName = ? and userinfo.UName = contract.UName',
     queryContractByCAddress:
       'select contract.UName,userinfo.UAddress ' +
       'from contract,userinfo ' +
-      'where contract.CAddress=? and userinfo.UName = contract.UName'
+      'where contract.CAddress=? and userinfo.UName = contract.UName',
+    endContract: 'CALL endContract(?)'
   },
   requestOP: {
     requestJoin:
@@ -38,7 +39,10 @@ var sqlMap = {
     queryAllUnresolvedRequest:
       'select requesttable.beRequestUName,requesttable.CAddress,contract.CName,contract.CDescription ' +
       'from requesttable,contract ' +
-      'where requesttable.requestUName = ? and requesttable.isPermit = "否"  and requesttable.CAddress=contract.CAddress '
+      'where requesttable.requestUName = ? and requesttable.isPermit = "否"  and requesttable.CAddress=contract.CAddress ',
+    endRequest:
+      'update requesttable set isPermit = "终止" where requestUName=? and CAddress=? and isPermit="否"',
+    admitJoinRequest: 'CALL admit(?,?,?)'
   },
   involvedOP: {
     involvedUserInfo:
@@ -55,8 +59,7 @@ var sqlMap = {
       'where involvedtable.UName=? and involvedtable.CAddress=? and userinfo.UName = involvedtable.UName',
     vote:
       'update involvedtable set isVoted = "是" where UName = ? and  CAddress = ?'
-  },
-  admitJoinRequest: 'CALL admit(?,?,?)'
+  }
 }
 
 module.exports = sqlMap

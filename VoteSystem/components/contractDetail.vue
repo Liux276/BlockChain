@@ -77,6 +77,45 @@ export default {
   methods: {
     handleVote(index, proposalName) {
       console.log(index, proposalName)
+      let context = this
+      this.btnLoading = true
+      this.$axios
+        .post('/api/contract/voteToProposal', {
+          CAddress: context.CAddress,
+          proposalIndex: index,
+          proposalName: proposalName
+        })
+        .then(res => {
+          if (res.status === 200 && res.data.state) {
+            context.$notify({
+              type: 'success',
+              message: res.data.message,
+              duration: 1500
+            })
+            context.canVote = false
+          } else {
+            context.$notify({
+              type: 'error',
+              message:
+                typeof res.data.message === 'undefined'
+                  ? '请登录后操作'
+                  : res.data.message,
+              duration: 1500
+            })
+          }
+          context.btnLoading = false
+        })
+        .catch(err => {
+          context.btnLoading = false
+          context.$notify({
+            type: 'error',
+            message:
+              typeof res.data.message === 'undefined'
+                ? '请检查网络连接'
+                : res.data.message,
+            duration: 1500
+          })
+        })
     }
   }
 }

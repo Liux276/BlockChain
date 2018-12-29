@@ -243,13 +243,71 @@ var contractOP = {
         myContract.methods
           .delegateTo(delegateAddress)
           .send()
+          .then(receipt => {
+            console.log('[委托成功]', receipt)
+            db.vote(UName, CAddress, callback)
+          })
           .catch(err => {
             console.log('[委托失败]', err)
             callback(err, '委托失败')
           })
+      })
+  },
+  //投票给合约的特定提议
+  voteTOProposal: async function(
+    UName,
+    UAddress,
+    UPassword,
+    CAddress,
+    proposalIndex,
+    proposalName,
+    callback
+  ) {
+    let myContract = new web3.eth.Contract(compiledContract.abi, CAddress, {
+      from: UAddress
+    })
+    web3.eth.personal
+      .unlockAccount(UAddress, UPassword, 1000)
+      .catch(err => {
+        console.log('[账户解锁失败]', err)
+        callback(err, '账户解锁失败')
+      })
+      .then(() => {
+        myContract.methods
+          .vote(proposalIndex, web3.utils.utf8ToHex(proposalName))
+          .send()
           .then(receipt => {
-            console.log('[委托成功]', receipt)
+            console.log('[投票成功]', receipt)
             db.vote(UName, CAddress, callback)
+          })
+          .catch(err => {
+            console.log('[投票失败]', err)
+            callback(err, '投票失败')
+          })
+      })
+  },
+  //终止合约
+  endContract: async function(CAddress, UAddress, UPassword, callback) {
+    let myContract = new web3.eth.Contract(compiledContract.abi, CAddress, {
+      from: UAddress
+    })
+    web3.eth.personal
+      .unlockAccount(UAddress, UPassword, 1000)
+      .catch(err => {
+        console.log('[账户解锁失败]', err)
+        callback(err, '账户解锁失败')
+      })
+      .then(() => {
+        myContract.methods
+          .stopVote()
+          .send()
+          .then(receipt => {
+            console.log('[结束合约成功]', receipt)
+            db.endContract(CAddress, callback)
+          })
+          .catch(err => {
+            console.log('[结束合约失败]', err)
+            callback(err, '结束合约失败')
           })
       })
   }

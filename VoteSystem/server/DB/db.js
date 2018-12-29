@@ -54,6 +54,11 @@ db.creatContract = async function(
   )
 }
 
+//终止合约
+db.endContract = async function(CAddress, callback) {
+  conn.query(sqlMap.contractOP.endContract, [CAddress], callback)
+}
+
 //查询属于该用户的合约信息
 db.queryUserContract = async function(userName, callback) {
   conn.query(sqlMap.contractOP.queryUserContract, [userName], callback)
@@ -100,6 +105,10 @@ db.requstJoinContract = async function(
   )
 }
 
+db.endRequest = async function(requestUName, CAddress, callback) {
+  conn.query(sqlMap.requestOP.endRequest, [requestUName, CAddress], callback)
+}
+
 //同意加入项目
 db.admitJoinContract = async function(
   requestUName,
@@ -108,7 +117,7 @@ db.admitJoinContract = async function(
   callback
 ) {
   conn.query(
-    sqlMap.admitJoinRequest,
+    sqlMap.requestOP.admitJoinRequest,
     [requestUName, beRequestUName, CAddress],
     callback
   )

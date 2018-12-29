@@ -14,6 +14,7 @@
     <el-table-column label="合约地址" prop="CAddress"></el-table-column>
     <el-table-column label="合约名称" prop="CName"></el-table-column>
     <el-table-column label="合约描述" prop="CDescription" :show-overflow-tooltip="true"></el-table-column>
+    <el-table-column label="用户名称" prop="UName"></el-table-column>
     <el-table-column align="right">
       <template slot="header" slot-scope="scope">
         <el-input v-model="search" size="medium" placeholder="输入关键字搜索"/>

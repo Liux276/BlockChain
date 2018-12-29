@@ -3,7 +3,6 @@
     <el-table
       v-loading="loading"
       :data="tableData.filter(data  => !search || data.CName.toLowerCase().includes(search.toLowerCase()) || data.CDescription.toLowerCase().includes(search.toLowerCase()))"
-      @expand-change="rowExpand"
       stripe
       class="contractTable"
     >
@@ -25,6 +24,7 @@
             size="medium"
             type="danger"
             icon="el-icon-delete"
+            :loading="btnLoading"
             @click="handleDelete(scope.$index, scope.row)"
           >删除</el-button>
         </template>
@@ -43,7 +43,8 @@ export default {
     return {
       tableData: [],
       search: '',
-      loading: false
+      loading: false,
+      btnLoading: false
     }
   },
   created() {
@@ -83,9 +84,40 @@ export default {
   methods: {
     handleDelete(index, row) {
       console.log(index, row)
-    },
-    rowExpand(row, expandedRows) {
-      console.log(row, expandedRows)
+      let context = this
+      this.btnLoading = true
+      return this.$axios
+        .post('/api/contract/endRequest', {
+          CAddress: row.CAddress
+        })
+        .then(res => {
+          if (res.status === 200 && res.data.state) {
+            context.$notify({
+              type: 'success',
+              message: res.data.message,
+              duration: 1500
+            })
+            context.tableData.splice(index, 1)
+          } else {
+            context.$notify({
+              type: 'error',
+              message:
+                typeof res.data.message === 'undefined'
+                  ? '请登录后操作'
+                  : res.data.message,
+              duration: 1500
+            })
+          }
+          context.btnLoading = false
+        })
+        .catch(err => {
+          context.$notify({
+            type: 'error',
+            message: '请求失败，请检查网络连接',
+            duration: 1500
+          })
+          context.btnLoading = false
+        })
     }
   }
 }

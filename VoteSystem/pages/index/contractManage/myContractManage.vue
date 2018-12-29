@@ -11,19 +11,21 @@
           <contractDetail :CAddress="props.row.CAddress"/>
         </template>
       </el-table-column>
-      <el-table-column label="合约地址" prop="CAddress"></el-table-column>
-      <el-table-column label="合约名称" prop="CName"></el-table-column>
-      <el-table-column label="合约描述" prop="CDescription" :show-overflow-tooltip="true"></el-table-column>
+      <el-table-column label="合约地址" prop="CAddress"/>
+      <el-table-column label="合约名称" prop="CName"/>
+      <el-table-column label="合约描述" prop="CDescription" :show-overflow-tooltip="true"/>
+      <el-table-column label="合约状态" prop="isEnd" :show-overflow-tooltip="true"/>
       <el-table-column align="right">
         <template slot="header" slot-scope="scope">
           <el-input v-model="search" size="medium" placeholder="输入关键字搜索"/>
         </template>
-        <template slot-scope="scope">
+        <template v-if="scope.row.isEnd === '投票中'" slot-scope="scope">
           <el-button
             size="small"
             type="success"
             icon="el-icon-circle-plus"
             class="mybtn"
+            :loading="itemBtnLoading"
             @click="handleAdd(scope.$index, scope.row)"
           >添加提议</el-button>
           <el-button
@@ -31,8 +33,9 @@
             type="danger"
             icon="el-icon-delete"
             class="mybtn"
-            @click="handleDelete(scope.$index, scope.row)"
-          >终止合约</el-button>
+            :loading="itemBtnLoading"
+            @click="handleEnd(scope.$index, scope.row)"
+          >停止投票</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -65,6 +68,7 @@ export default {
       search: '',
       loading: false,
       addProposalLoading: false,
+      itemBtnLoading: false,
       dialogFormVisible: false,
       formLabelWidth: '100px',
       form: {
@@ -113,11 +117,43 @@ export default {
       this.queryAddress = row.CAddress
       this.dialogFormVisible = true
     },
-    handleDelete(index, row) {
-      console.log(index, row)
+    handleEnd(index, row) {
+      let context = this
+      this.itemBtnLoading = true
+      return this.$axios
+        .post('/api/contract/endContract', {
+          CAddress: row.CAddress
+        })
+        .then(res => {
+          if (res.status === 200 && res.data.state) {
+            context.$notify({
+              type: 'success',
+              message: res.data.message,
+              duration: 1500
+            })
+            context.tableData[index].isEnd = '终止'
+          } else {
+            context.$notify({
+              type: 'error',
+              message:
+                typeof res.data.message === 'undefined'
+                  ? '请登录后操作'
+                  : res.data.message,
+              duration: 1500
+            })
+          }
+          context.itemBtnLoading = false
+        })
+        .catch(err => {
+          context.$notify({
+            type: 'error',
+            message: '请求失败，请检查网络连接',
+            duration: 1500
+          })
+          context.itemBtnLoading = false
+        })
     },
     addProposal(row) {
-      console.log(row)
       this.addProposalLoading = true
       let context = this
       this.$axios

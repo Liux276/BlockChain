@@ -2,7 +2,7 @@
   <div id="main">
     <el-container>
       <el-header class="el-header-mainpage">
-        <h1 class="title">投票管理系统</h1>
+        <h1 class="title">区块链投票系统</h1>
         <div class="login">
           <el-dropdown @command="handleCommand">
             <i class="el-icon-setting icon-setting"></i>

@@ -321,7 +321,7 @@ contractRouter.post('/queryProposals', (req, res) => {
                       } else if (result.length === 0) {
                         canVote = false
                       } else {
-                        if (result[0].isVoted === '是') {
+                        if (result[0].isVoted !== '否') {
                           canVote = false
                         } else {
                           canVote = true
@@ -352,7 +352,56 @@ contractRouter.post('/queryProposals', (req, res) => {
   }
 })
 //投票给特定合约的特定提议
-contractRouter.post('/voteToProposal', (req, res) => {})
+contractRouter.post('/voteToProposal', (req, res) => {
+  let userName = req.user.userName
+  let userPassword = req.user.userPassword
+  let CAddress = req.body.CAddress
+  let proposalIndex = req.body.proposalIndex
+  let proposalName = req.body.proposalName
+  if (
+    typeof CAddress !== 'string' ||
+    typeof proposalIndex !== 'number' ||
+    typeof proposalName !== 'string' ||
+    CAddress.length === 0 ||
+    proposalName.length === 0
+  ) {
+    console.log(typeof proposalIndex)
+    res.json({ state: false, message: '传入参数格式错误' })
+  } else {
+    db.queryInvolvedContractByCAddress(userName, CAddress, (err, result) => {
+      if (err || result.length === 0) {
+        res.json({ state: false, message: '未参与该项目' })
+      } else {
+        if (result[0].isVoted !== '否') {
+          res.json({ state: false, message: '你已经投过票了' })
+        } else {
+          let UAddress = result[0].UAddress
+          contractOP.voteTOProposal(
+            userName,
+            UAddress,
+            userPassword,
+            CAddress,
+            proposalIndex,
+            proposalName,
+            (err, result) => {
+              if (err) {
+                res.json({
+                  state: false,
+                  message: '投票失败'
+                })
+              } else {
+                res.json({
+                  state: 200,
+                  message: '投票成功'
+                })
+              }
+            }
+          )
+        }
+      }
+    })
+  }
+})
 //添加提议到指定合约
 contractRouter.post('/addProposalToContract', (req, res) => {
   let userName = req.user.userName
@@ -420,7 +469,7 @@ contractRouter.post('/giveChairToUser', (req, res) => {
       if (err || result.length === 0) {
         res.json({ state: false, message: '你没有参加该投票' })
       } else {
-        if (result[0].isVoted === '是') {
+        if (result[0].isVoted !== '否') {
           res.json({ state: false, message: '你已经投票过了，请勿重复操作' })
         } else {
           let UAddress = result[0].UAddress
@@ -434,7 +483,7 @@ contractRouter.post('/giveChairToUser', (req, res) => {
                   message: '你委托的用户不存在'
                 })
               } else {
-                if (result[0].isVoted === '是') {
+                if (result[0].isVoted !== '否') {
                   res.json({
                     state: false,
                     message: '你委托的用户已经投过票了，请选择其它用户'
@@ -449,9 +498,15 @@ contractRouter.post('/giveChairToUser', (req, res) => {
                     CAddress,
                     (err, result) => {
                       if (err) {
-                        res.json({ state: false, message: result })
+                        res.json({
+                          state: false,
+                          message: result
+                        })
                       } else {
-                        res.json({ state: 200, message: '委托成功' })
+                        res.json({
+                          state: 200,
+                          message: '委托成功'
+                        })
                       }
                     }
                   )
@@ -476,6 +531,68 @@ contractRouter.post('/involvedUserInfo', (req, res) => {
         res.json({ state: false, message: '查询用户列表出错，请稍后重试' })
       } else {
         res.json({ state: 200, message: '查询用户列表成功', results: result })
+      }
+    })
+  }
+})
+//终止一个合约
+contractRouter.post('/endContract', (req, res) => {
+  let CAddress = req.body.CAddress
+  let userName = req.user.userName
+  let userPassword = req.user.userPassword
+  if (typeof CAddress !== 'string' || CAddress.length === 0) {
+    res.json({ state: false, message: '传入参数格式错误' })
+  } else {
+    db.queryContractAndUAddress(CAddress, userName, (err, result) => {
+      if (err || result.length === 0) {
+        res.json({
+          state: false,
+          message: '终止合约出错，请确认合约地址以及你是合约创建者'
+        })
+      } else {
+        let UAddress = result[0].UAddress
+        if (result[0].isEnd === '终止') {
+          res.json({
+            state: false,
+            message: '合约已终止，请勿重复操作'
+          })
+        } else {
+          contractOP.endContract(
+            CAddress,
+            UAddress,
+            userPassword,
+            (err, result) => {
+              if (err) {
+                console.log('[结束合约失败]', err)
+                res.json({
+                  state: false,
+                  message: '终止合约失败，请稍后重试'
+                })
+              } else {
+                res.json({
+                  state: 200,
+                  message: '终止合约成功'
+                })
+              }
+            }
+          )
+        }
+      }
+    })
+  }
+})
+//终止请求
+contractRouter.post('/endRequest', (req, res) => {
+  let CAddress = req.body.CAddress
+  let userName = req.user.userName
+  if (typeof CAddress !== 'string' || CAddress.length === 0) {
+    res.json({ state: false, message: '传入参数格式错误' })
+  } else {
+    db.endRequest(userName, CAddress, (err, result) => {
+      if (err || result.length === 0) {
+        res.json({ state: false, message: '终止请求错误，请确认权限' })
+      } else {
+        res.json({ state: 200, message: '终止请求成功' })
       }
     })
   }
