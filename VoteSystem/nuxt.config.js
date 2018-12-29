@@ -40,12 +40,18 @@ module.exports = {
   */
   modules: [
     // Doc: https://github.com/nuxt-community/axios-module#usage
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
   ],
+  // proxy: {
+
+  //   '*': 'http://172.18.32.6:8080',
+
+  // },
   /*
   ** Axios module configuration
   */
   axios: {
+    // proxy: true
     // See https://github.com/nuxt-community/axios-module#options
   },
 

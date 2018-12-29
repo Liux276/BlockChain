@@ -11,44 +11,66 @@ create table if not exists UserInfo (
     UGroup char(20) DEFAULT null,
     primary key(UName)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
--- 测试用户
--- insert into userinfo(UName, UPassword,UAddress,UGroup) values("liux276", "liuxiao123", "0xe86dfe376f8b861232c8b7a5ee195be57663306c", null)
 -- 合约记录
 create table if not exists Contract (
     CAddress char(44) not null,
     CName char(20) not null,
-    CDescribe char(20) not null,
+    CDescription char(20) not null,
     UName char(20) not null,
     primary key(CAddress),
     foreign key(UName) references UserInfo(UName) on delete no action
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- 参与的投票
 create table if not exists InvolvedTable (
-    IID int auto_increment,
     UName char(20) not null,
     CAddress char(44) not null,
-    isVoted bool DEFAULT false,
-    primary key(IID),
+    isVoted char(4) DEFAULT "否",
+    primary key(UName,CAddress),
     foreign key(UName) references UserInfo(UName) on delete no action,
-    foreign key(CAddress) references Contract(CAddress) on delete no action
+    foreign key(CAddress) references Contract(CAddress) on delete cascade
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- 请求参与投票的列表
 create table if not exists RequestTable (
-    RID int auto_increment,
-    UName char(20) not null,
+    requestUName char(20) not null,
+    beRequestUName char(20) not null,
     CAddress char(44) not null,
-    isPermit bool DEFAULT false,
-    primary key(RID),
-    foreign key(UName) references UserInfo(UName) on delete no action,
-    foreign key(CAddress) references Contract(CAddress) on delete no action
+    isPermit char(4) DEFAULT "否",
+    primary key(requestUName,beRequestUName,CAddress),
+    foreign key(requestUName) references UserInfo(UName) on delete no action,
+    foreign key(beRequestUName) references UserInfo(UName) on delete no action,
+    foreign key(CAddress) references Contract(CAddress) on delete cascade
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
--- 被请求参与的表
-create table if not exists BeRequestTable (
-    BID int auto_increment,
-    UName char(20) not null,
-    CAddress char(44) not null,
-    isPermit bool DEFAULT false,
-    primary key(BID),
-    foreign key(UName) references UserInfo(UName) on delete no action,
-    foreign key(CAddress) references Contract(CAddress) on delete no action
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+-- -- 请求
+-- DROP PROCEDURE IF EXISTS request;
+-- DELIMITER //
+-- CREATE PROCEDURE request(in requestUName char(20), in beRequestUName char(20), in CAddressIN char(44))
+-- BEGIN
+-- DECLARE EXIT HANDLER FOR SQLEXCEPTION
+-- begin
+-- rollback;
+-- signal sqlstate '12345' set MESSAGE_TEXT = 'request EXCEPTION';
+-- end;
+-- START TRANSACTION;
+-- insert into RequestTable(UName,CAddress) values (requestUName,CAddressIN);
+-- insert into BeRequestTable (UName,CAddress) values (beRequestUName,CAddressIN);
+-- select * from RequestTable;
+-- COMMIT;
+-- END//
+-- DELIMITER ;
+
+-- 同意
+DROP PROCEDURE IF EXISTS admit;
+DELIMITER //
+CREATE PROCEDURE admit(in requestUNameIN char(20), in beRequestUNameIN char(20), in CAddressIN char(44))
+BEGIN
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+begin
+rollback;
+signal sqlstate '12346' set MESSAGE_TEXT = 'admit EXCEPTION';
+end;
+START TRANSACTION;
+update RequestTable set isPermit = '是' where CAddress=CAddressIN && requestUName=requestUNameIN && beRequestUName=beRequestUNameIN;
+insert into InvolvedTable(UName,CAddress) values (requestUNameIN,CAddressIN);
+COMMIT;
+END//
+DELIMITER ;

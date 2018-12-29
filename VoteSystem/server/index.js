@@ -32,46 +32,49 @@ async function start() {
   app.use(cookieParser())
   //过滤掉可以直接访问的资源
   var filter = function(req) {
-    if(req.path === '/Login' 
-      || req.path === '/api/user/login'
-      || req.path === '/api/user/registe'
-      || req.path === '/favicon.ico'
-      || req.path === '/logo.png'
-      || req.path === '/__webpack_hmr/client'
-      || req.path.substring(0,14) === '/__webpack_hmr'
-      || req.path.substring(0,6) === '/_nuxt' ){
+    if (
+      req.path === '/Login' ||
+      req.path === '/api/user/login' ||
+      req.path === '/api/user/registe' ||
+      req.path === '/favicon.ico' ||
+      req.path === '/logo.png' ||
+      req.path === '/__webpack_hmr/client' ||
+      req.path.substring(0, 14) === '/__webpack_hmr' ||
+      req.path.substring(0, 6) === '/_nuxt'
+    ) {
       return true
-    }
-    else return false
+    } else return false
   }
   //校验Token
-  app.use(expressJwt({ 
-    secret:myJwt.secretOrPrivateKey,
-    getToken: function fromHeaderOrQuerystring (req) {
-      if (typeof req.headers.authorization !== 'undefined' && (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer')) {
-        return req.headers.authorization.split(' ')[1]
-      } else if (typeof req.cookies.token !== 'undefined') {
-        return req.cookies.token.split(' ')[1]
+  app.use(
+    expressJwt({
+      secret: myJwt.secretOrPrivateKey,
+      getToken: function fromHeaderOrQuerystring(req) {
+        if (
+          typeof req.headers.authorization !== 'undefined' &&
+          (req.headers.authorization &&
+            req.headers.authorization.split(' ')[0] === 'Bearer')
+        ) {
+          return req.headers.authorization.split(' ')[1]
+        } else if (typeof req.cookies.token !== 'undefined') {
+          return req.cookies.token.split(' ')[1]
+        }
+        return null
       }
-      return null;
-    }
-  }).unless(filter))
+    }).unless(filter)
+  )
   //Token失败处理
-  app.use(function (err, req, res, next) {
+  app.use(function(err, req, res, next) {
     //console.log(err)
-    if (err.name === 'UnauthorizedError') {   
-      res.redirect('/Login')
-    }
+    // if (err.name === 'UnauthorizedError') {
+
+    // }
+    res.redirect('/Login')
   })
-  //show User
-  // app.use(function (req,res,next){
-  //   console.log('[USER]',req.user)
-  //   next()
-  // })
   //user router
-  app.use('/api/user',userRouter)
+  app.use('/api/user', userRouter)
   //contractop router
-  app.use('/api/contract',contractRouter)
+  app.use('/api/contract', contractRouter)
   // Give nuxt middleware to express
   app.use(nuxt.render)
   // Listen the server

@@ -1,4 +1,5 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 //一个有委托功能的投票系统
 contract Ballot {
 
@@ -14,7 +15,7 @@ contract Ballot {
     // 代表一份提议的数据结构 
     struct Proposal {
         bytes32 name; // 提议的名称
-        bytes32 content; //提议的内容
+        bytes content; //提议的内容
         uint voteCount; // 提议接受的投票数
     }
 
@@ -25,7 +26,7 @@ contract Ballot {
     bytes32 private VoteName;
 
     // 投票项目描述
-    bytes32 private VoteDescription;
+    bytes private VoteDescription;
 
     //投票是否终止
     bool private wetherStopped = false;
@@ -37,7 +38,7 @@ contract Ballot {
     Proposal[] private proposals;
 
     // 传入提议名称来定义一个投票对象
-    constructor(bytes32 voteName,bytes32 voteDescription,bytes32[] memory proposalNames,bytes32[] memory proposalContents) public
+    constructor(bytes32 voteName,bytes memory voteDescription,bytes32[] memory proposalNames,bytes[] memory proposalContents) public
     {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
@@ -62,7 +63,7 @@ contract Ballot {
     }
 
     //添加提议
-    function addProposal(bytes32 proposalName,bytes32 proposalContent) public
+    function addProposal(bytes32 proposalName,bytes memory proposalContent) public
     {
         //需要投票未终止
         require(wetherStopped == false,"The vote has been stopped.");
@@ -71,7 +72,7 @@ contract Ballot {
         //提案名字和内容不能重复
         for(uint i = 0; i < proposals.length; i++){
             require(proposals[i].name!=proposalName ,"Proposal name or content has been added.");
-            require(proposals[i].content!=proposalContent ,"Proposal name or content has been added.");
+            //require(proposals[i].content!=proposalContent ,"Proposal name or content has been added.");
         }
         proposals.push(Proposal({
             name: proposalName,
@@ -87,13 +88,13 @@ contract Ballot {
     }
 
     //查看项目描述
-    function showDescription() public view returns (bytes32 )
+    function showDescription() public view returns (bytes memory )
     {
         return VoteDescription;    
     }
 
     //查看特定的提议
-    function showProposal(uint num) public view returns (bytes32  proposalName_,bytes32  proposalContent_,uint num_)
+    function showProposal(uint num) public view returns (bytes32  proposalName_,bytes memory proposalContent_,uint num_)
     {
         proposalName_ = proposals[num].name;
         proposalContent_ = proposals[num].content;
@@ -101,10 +102,10 @@ contract Ballot {
     }
 
     //查看所有的提议
-    function showAllProposals() public view returns (bytes32[] memory ,bytes32[] memory ,uint[] memory )
+    function showAllProposals() public view returns (bytes32[] memory ,bytes[] memory ,uint[] memory )
     {
         bytes32[] memory proposalName_ = new bytes32[](proposals.length);
-        bytes32[] memory proposalContent_ = new bytes32[](proposals.length);
+        bytes[] memory proposalContent_ = new bytes[](proposals.length);
         uint[] memory tickets = new uint[](proposals.length);
         for(uint i = 0;i<proposals.length;i++){
             proposalName_[i] = proposals[i].name;
@@ -190,12 +191,11 @@ contract Ballot {
     }
 
     // 投票给某个提议
-    function vote(uint proposal,bytes32 proposalName_) public
+    function vote(uint proposal) public
     {
         //需要投票未终止
         require(wetherStopped == false,"The vote has been stopped.");
-        //需要序号和提议名称一致
-        require(proposals[proposal].name == proposalName_,"Proposal number must correspond to proposalName");
+
         Voter storage sender = voters[msg.sender];
         require(!sender.voted,"The voter has voted.");
         sender.voted = true;
@@ -217,7 +217,7 @@ contract Ballot {
     }
 
     //投票最多的提案的名称和内容
-    function winnerProposalName() public view returns (bytes32 winnerName_,bytes32 winnerContent_) 
+    function winnerProposalName() public view returns (bytes32 winnerName_,bytes memory winnerContent_) 
     {
         uint winningNumber = winningProposal();
         winnerName_ = proposals[winningNumber].name;

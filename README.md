@@ -1,2 +1,2 @@
-# BlockChain
+# BlockChainProject
 BlockChain Project

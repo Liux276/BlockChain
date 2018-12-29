@@ -1,10 +1,9 @@
 <!-- 登录页面 -->
 <template>
-  <div class="login-container">
+  <el-container class="login-container">
     <el-form class="login-form">
-
       <div class="image-center">
-        <img src="/logo.png"/>
+        <img src="/logo.png">
       </div>
 
       <div class="sign-text">
@@ -15,42 +14,42 @@
         <span>请输入用户名：</span>
         <el-input
           class="el-input"
-          v-model="loginForm.username" 
-          name="username" 
-          type="text" 
-          placeholder="6~18位英文字母、数字，以英文字母开头" 
-          clearable/>
+          v-model="loginForm.username"
+          name="username"
+          type="text"
+          placeholder="6~18位英文字母、数字，以英文字母开头"
+          clearable
+        />
       </el-form-item>
 
       <el-form-item>
         <span>请输入密码：</span>
         <el-input
           class="el-input"
-          v-model="loginForm.password" 
+          v-model="loginForm.password"
           clearable
-          name="password" 
-          type="password" 
+          name="password"
+          type="password"
           placeholder="密码为6~12位数字、大小写字母、下划线"
-          @key.enter.native="handleLogin" />
+          @key.enter.native="handleLogin"
+        />
       </el-form-item>
 
-      <el-button 
+      <el-button
         :loading="loading"
-        type="primary" 
-        style="width:45%;margin-bottom:30px;margin-right:10px;" 
-        @click.native.prevent="handleLogin" >
-        登录
-      </el-button>
+        type="primary"
+        style="width:45%;margin-bottom:30px;margin-right:10px;"
+        @click.native.prevent="handleLogin"
+      >登录</el-button>
 
-      <el-button 
+      <el-button
         :loading="loading"
-        type="primary" 
-        style="width:45%;margin-bottom:30px;" 
-        @click.native.prevent="handleRegist" >
-        注册
-      </el-button>
+        type="primary"
+        style="width:45%;margin-bottom:30px;"
+        @click.native.prevent="handleRegist"
+      >注册</el-button>
     </el-form>
-  </div>
+  </el-container>
 </template>
 
 <script>
@@ -67,62 +66,64 @@ export default {
   },
   created() {},
   methods: {
-    async  handleLogin() {
+    async handleLogin() {
       this.loading = true
       let context = this
-      this.$axios.post('/api/user/login', {
-        name: this.loginForm.username,
-        password: this.loginForm.password
-      })
-      .then(function (res) {
-        context.loading = false
-        if (res.status === 200 && res.data.state) {
-          context.$router.push({path: '/'})
-          context.$notify({
-            type: 'success',
-            message: res.data.message,
-            duration: 1000
-          })
-        } else {
-          context.$notify({
-            type: 'error',
-            message: res.data.message,
-            duration: 1000
-          })
-        }
-      })
-      .catch(function (error) {
-        context.loading = false
-        console.log(error);
-      })
+      this.$axios
+        .post('/api/user/login', {
+          name: this.loginForm.username,
+          password: this.loginForm.password
+        })
+        .then(function(res) {
+          context.loading = false
+          if (res.status === 200 && res.data.state) {
+            context.$router.push('/')
+            context.$notify({
+              type: 'success',
+              message: res.data.message,
+              duration: 1000
+            })
+          } else {
+            context.$notify({
+              type: 'error',
+              message: res.data.message,
+              duration: 1000
+            })
+          }
+        })
+        .catch(function(error) {
+          context.loading = false
+          console.log(error)
+        })
     },
     async handleRegist() {
       this.loading = true
       let context = this
-      this.$axios.post('/api/user/registe', {
-        name: this.loginForm.username,
-        password: this.loginForm.password
-      })
-      .then(function (res) {
-        context.loading = false
-        if (res.status === 200 && res.data.state) {
-          context.$notify({
-            type: 'success',
-            message: res.data.message,
-            duration: 1000
-          })
-        } else {
-          context.$notify({
-            type: 'error',
-            message: res.data.message,
-            duration: 1000
-          })
-        }
-      })
-      .catch(function (error) {
-        context.loading = false
-        console.log(error);
-      })
+      this.$axios
+        .post('/api/user/registe', {
+          name: this.loginForm.username,
+          password: this.loginForm.password
+        })
+        .then(function(res) {
+          context.loading = false
+          if (res.status === 200 && res.data.state) {
+            context.$notify({
+              type: 'success',
+              message: res.data.message,
+              duration: 1000
+            })
+          } else {
+            context.$notify({
+              type: 'error',
+              message: res.data.message,
+              duration: 1000
+            })
+          }
+        })
+        .catch(function(error) {
+          context.loading = false
+          console.log(error)
+        })
     }
   }
 }
@@ -130,7 +131,6 @@ export default {
 
 <style scoped>
 .login-container {
-  position: fixed;
   height: 100%;
   width: 100%;
   background-size: cover;
