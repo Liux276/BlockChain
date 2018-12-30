@@ -14,7 +14,7 @@ var sqlMap = {
       'where contract.UName != ? and contract.isEnd = "投票中" and contract.CAddress not in ( ' +
       'select requesttable.CAddress ' +
       'from requesttable ' +
-      'where requesttable.requestUName=? and requesttable.isPermit = "是" ) ',
+      'where requesttable.requestUName=? and requesttable.isPermit != "终止" ) ',
     queryUserContract: 'select * from contract where UName=?',
     queryContract: 'select * from contract where CAddress=? and UName = ?',
     queryContractAndUAddress:
