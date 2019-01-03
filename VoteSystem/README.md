@@ -4,7 +4,7 @@
 
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
 $ npm install
 
@@ -18,5 +18,9 @@ $ npm start
 # generate static project
 $ npm run generate
 ```
+
+##### You need to change the default address at `./server/contractOP/contractOP.js` row 34 and 35.
+
+---
 
 For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
