@@ -21,6 +21,8 @@ $ npm run generate
 
 ##### You need to change the default address at `./server/contractOP/contractOP.js` row 34 and 35.
 
+##### 使用`ganache-cli`作为测试用区块链
+
 ---
 
 For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
